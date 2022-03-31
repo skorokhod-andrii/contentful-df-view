@@ -11,6 +11,7 @@ import {
 import { FieldExtensionSDK } from "@contentful/app-sdk";
 import { v4 as uuid } from "uuid";
 import { TextInput } from "@contentful/f36-components";
+import Popover from "@mui/material/Popover";
 interface FieldProps {
   sdk: FieldExtensionSDK;
   cma: PlainClientAPI;
@@ -41,7 +42,19 @@ const Field = (props: FieldProps) => {
   // -> https://www.contentful.com/developers/docs/extensibility/field-editors/
 
   const [items, setItems] = useState<TrainingPhraseItem[]>([]);
+  const [anchorEl, setAnchorEl] = React.useState<HTMLInputElement | null>(null);
 
+  const handleClick = (item: TrainingPhraseItem) => (event: React.MouseEvent<HTMLInputElement>) => {
+    console.log(window.getSelection());
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover' : undefined;
   useEffect(() => {
     // This ensures our app has enough space to render
     props.sdk.window.startAutoResizer();
@@ -73,12 +86,7 @@ const Field = (props: FieldProps) => {
   const deleteItem = (item: TrainingPhraseItem) => {
     props.sdk.field.setValue(items.filter((i) => i.id !== item.id));
   };
-  const openTooltip = (item: TrainingPhraseItem) => (event: React.MouseEvent<HTMLInputElement>) =>{
-    const selection = window.getSelection();
-    if(selection){
-      //TODO open tooltip
-    }
-  }
+
   return (
     <div>
       <Table>
@@ -92,8 +100,20 @@ const Field = (props: FieldProps) => {
                   width="full"
                   value={item.text}
                   onChange={onTrainingPhraseChange(item)}
-                  onMouseUpCapture={openTooltip(item)}
+                  onMouseUpCapture={handleClick(item)}
                 />
+                <Popover
+                  id={id}
+                  open={open}
+                  anchorEl={anchorEl}
+                  onClose={handleClose}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                >
+
+                </Popover>
               </TableCell>
               <TableCell align="right">
                 <EditorToolbarButton
