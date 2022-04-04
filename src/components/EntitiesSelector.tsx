@@ -1,44 +1,45 @@
-// import React, { useEffect, useState } from "react";
-// import MenuItem from "@mui/material/MenuItem";
-// import FormHelperText from "@mui/material/FormHelperText";
-// import FormControl from "@mui/material/FormControl";
-// import Select, { SelectChangeEvent } from "@mui/material/Select";
-// import { useSelector, useDispatch } from 'react-redux'
-// import { RootState } from "./store";
+import FormControl from "@mui/material/FormControl";
+import React from "react";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import { EntityLabel } from "./types";
 
-// type EntitiesPopoverProps = {
-//   entityName?: string;
-//   setEntityName: (entityName: string) => void;
-// };
+interface EntitiesSelectorProps {
+  entityLabel: EntityLabel | null;
+  onEntityNameChange: (selection: EntityLabel) => void;
+}
+const entityNames = ["foo", "bar", "baz"];
 
+const EntitiesSelector = (props: EntitiesSelectorProps) => {
+  const { onEntityNameChange, entityLabel } = props;
+  const [entityName, setEntityName] = React.useState(entityLabel?.entity || "");
+  if (entityLabel === null) {
+    return <div>BUGGGG</div>;
+  }
+  const handleChange = (event: any): void => {
+    console.log(event);
+    setEntityName(event.target.value);
+    onEntityNameChange({ ...entityLabel, entity: event.target.value });
+  };
+  return (
+    <FormControl sx={{ m: 1, minWidth: 150, minHeight: 150 }}>
+      <Select
+        labelId="entity-name-selector"
+        id="entity-name-selector"
+        value={entityName}
+        onChange={handleChange}
+      >
+        <MenuItem value="" key="None">
+          <em>None</em>
+        </MenuItem>
+        {entityNames.map((entityName) => (
+          <MenuItem key={entityName} value={entityName}>
+            {entityName}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
+};
 
-// export const EntityNameSelector = () => {
-//   const dispatch = useDispatch();
-//   const entities = useSelector((state: RootState) => state.main.entityNames);
-//   const selectedTrainingPhrase = useSelector((state: RootState) => state.main.selectedTrainingPhrase);
-//   // const { entityName, setEntityName } = props;
-//   // const handleChange = (event: SelectChangeEvent) => {
-//   //   setEntityName(event.target.value);
-//   // };
-//   return (
-//     <div>
-//       <FormControl sx={{ m: 1, minWidth: 120 }}>
-//         <Select
-//           value={entityName}
-//           onChange={handleChange}
-//           displayEmpty
-//           inputProps={{ "aria-label": "Without label" }}
-//         >
-//           <MenuItem value="">
-//             <em>None</em>
-//           </MenuItem>
-//           {entities.map((entity) => (
-//             <MenuItem value={entity}>{entity}</MenuItem>
-//           ))}
-//         </Select>
-//         <FormHelperText>Without label</FormHelperText>
-//       </FormControl>
-//     </div>
-//   );
-// };
-export {}
+export default EntitiesSelector;
