@@ -17,3 +17,8 @@ export interface EntityLabel {
   startPos: number;
   endPos: number;
 }
+
+export interface Word {
+  text: string;
+  isHighlighted: boolean;
+}

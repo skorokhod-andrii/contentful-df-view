@@ -1,60 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { PlainClientAPI } from "contentful-management";
-import {
-  Table,
-  TableBody,
-  TableRow,
-  TableCell,
-  EditorToolbarButton,
-  Button,
-} from "@contentful/forma-36-react-components";
-import { FieldExtensionSDK } from "@contentful/app-sdk";
-import { v4 as uuid } from "uuid";
-import { TextInput } from "@contentful/f36-components";
-import Popover from "@mui/material/Popover";
-interface FieldProps {
-  sdk: FieldExtensionSDK;
-  cma: PlainClientAPI;
-}
+import { FieldProps, TrainingPhraseItem } from "./types";
+import { Table, TableBody, TableRow, TextField } from "@mui/material";
+import { TrainingPhraseComponent } from "./TrainingPhraseComponent";
+import { createTrainingPhrase } from "./utils";
 
-interface TrainingPhraseItem {
-  id: string;
-  text: string;
-  entityLables: EntityLabel[];
-}
-
-interface EntityLabel {
-  entity: string;
-  startPos: number;
-  endPos: number;
-}
-
-function createTrainingPhrase(): TrainingPhraseItem {
-  return {
-    id: uuid(),
-    text: "",
-    entityLables: [],
-  };
-}
 const Field = (props: FieldProps) => {
-  // If you only want to extend Contentful's default editing experience
-  // reuse Contentful's editor components
-  // -> https://www.contentful.com/developers/docs/extensibility/field-editors/
-
-  const [items, setItems] = useState<TrainingPhraseItem[]>([]);
-  const [anchorEl, setAnchorEl] = React.useState<HTMLInputElement | null>(null);
-
-  const handleClick = (item: TrainingPhraseItem) => (event: React.MouseEvent<HTMLInputElement>) => {
-    console.log(window.getSelection());
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const open = Boolean(anchorEl);
-  const id = open ? 'simple-popover' : undefined;
+  const [trainingPhrases, setTrainingPhrases] = useState<TrainingPhraseItem[]>(
+    []
+  );
+  const [newTrainingPhraseText, setNewTrainingPhraseText] = useState("");
   useEffect(() => {
     // This ensures our app has enough space to render
     props.sdk.window.startAutoResizer();
@@ -62,78 +16,71 @@ const Field = (props: FieldProps) => {
     // Every time we change the value on the field, we update internal state
     props.sdk.field.onValueChanged((value: TrainingPhraseItem[]) => {
       if (Array.isArray(value)) {
-        setItems(value);
+        setTrainingPhrases(value);
       }
     });
   });
 
-  /** Adds another item to the list */
-  const addNewItem = () => {
-    props.sdk.field.setValue([...items, createTrainingPhrase()]);
+  /** Deletes an item from the list */
+  const deletePhraseById = (id: string) => {
+    props.sdk.field.setValue(trainingPhrases.filter((i) => i.id !== id));
   };
 
-  const onTrainingPhraseChange =
-    (item: TrainingPhraseItem) =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const selectedItem = items.find((i) => i.id === item.id);
-      if (selectedItem) {
-        selectedItem.text = event.target.value;
+  const saveTrainingPhrase = (trainingPhrase: TrainingPhraseItem) => {
+    const trainingPhraseIndex = trainingPhrases.findIndex(
+      (phrase) => phrase.id === trainingPhrase.id
+    );
+    if (trainingPhraseIndex !== -1) {
+      if (trainingPhrase.text !== trainingPhrases[trainingPhraseIndex].text) {
+        trainingPhrase.entityLables = [];
       }
-      props.sdk.field.setValue(items);
-    };
+      trainingPhrases[trainingPhraseIndex] = trainingPhrase;
+    } else {
+      trainingPhrases.push(trainingPhrase);
+    }
+    props.sdk.field.setValue(trainingPhrases);
+  };
 
-  /** Deletes an item from the list */
-  const deleteItem = (item: TrainingPhraseItem) => {
-    props.sdk.field.setValue(items.filter((i) => i.id !== item.id));
+  const addNewTrainingPhrase = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" && newTrainingPhraseText.trim().length > 0) {
+      props.sdk.field.setValue([
+        ...trainingPhrases,
+        createTrainingPhrase(newTrainingPhraseText),
+      ]);
+      setNewTrainingPhraseText("");
+    }
+  };
+
+  const handleNewTrainingPhraseChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setNewTrainingPhraseText(event.target.value);
   };
 
   return (
     <div>
+      <div style={{ marginBottom: "10px" }}>
+        <TextField
+          fullWidth
+          value={newTrainingPhraseText}
+          onKeyUp={addNewTrainingPhrase}
+          onChange={handleNewTrainingPhraseChange}
+          placeholder="Add new training phrase"
+        />
+      </div>
       <Table>
         <TableBody>
-          {items.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell>
-                <TextInput
-                  id="text"
-                  name="text"
-                  width="full"
-                  value={item.text}
-                  onChange={onTrainingPhraseChange(item)}
-                  onMouseUpCapture={handleClick(item)}
-                />
-                <Popover
-                  id={id}
-                  open={open}
-                  anchorEl={anchorEl}
-                  onClose={handleClose}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left",
-                  }}
-                >
-
-                </Popover>
-              </TableCell>
-              <TableCell align="right">
-                <EditorToolbarButton
-                  label="delete"
-                  icon="Delete"
-                  onClick={() => deleteItem(item)}
-                />
-              </TableCell>
+          {trainingPhrases.map((phrase: TrainingPhraseItem) => (
+            <TableRow key={phrase.id}>
+              <TrainingPhraseComponent
+                phrase={phrase}
+                deleteTrainingPhrase={deletePhraseById}
+                saveTrainingPhrase={saveTrainingPhrase}
+              />
             </TableRow>
           ))}
         </TableBody>
       </Table>
-      <Button
-        buttonType="naked"
-        onClick={addNewItem}
-        icon="PlusCircle"
-        style={{ marginTop: "5px" }}
-      >
-        Add user expression
-      </Button>
     </div>
   );
 };

@@ -5,16 +5,14 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import EditIcon from "@mui/icons-material/Edit";
 import EntitiesSelector from "./EntitiesSelector";
+import { buildWordsArray, isNumberInRange } from "./utils";
+import { WordsComponent } from "./WordsComponent";
 
 interface TrainingPhraseComponentProps {
   phrase: TrainingPhraseItem;
   deleteTrainingPhrase: (id: string) => void;
   saveTrainingPhrase: (trainingPhrase: TrainingPhraseItem) => void;
 }
-
-const isNumberInRange = (number: number, min: number, max: number) => {
-  return number >= min && number <= max;
-};
 
 export const TrainingPhraseComponent = (
   props: TrainingPhraseComponentProps
@@ -41,13 +39,14 @@ export const TrainingPhraseComponent = (
 
   const savePhrase = () => {
     setIsRedacted(false);
-
+    phrase.entityLables.sort((a, b) => a.startPos - b.startPos);
     saveTrainingPhrase(phrase);
   };
 
   const deletePhrase = () => {
     deleteTrainingPhrase(phrase.id);
   };
+
   const captureSelection = (event: any) => {
     const selection = window.getSelection();
     if (!selection) {
@@ -57,13 +56,28 @@ export const TrainingPhraseComponent = (
     if (!text) {
       return;
     }
-    console.log(phrase);
+    const anchorNum = selection.anchorNode?.parentElement?.dataset.count;
+    const focusNum = selection.focusNode?.parentElement?.dataset.count;
+    if (anchorNum === undefined || focusNum === undefined) {
+      console.log("no word index");
+      return;
+    }
+    const firstWordIndex = anchorNum < focusNum ? anchorNum : focusNum;
+    const secondWordIndex = anchorNum < focusNum ? focusNum : anchorNum;
+    const splittedWords = phrase.text.split(" ");
+    const selectedStartPos = splittedWords
+      .slice(0, Number(firstWordIndex))
+      .join(" ").length;
+    const selectedEndPos = splittedWords
+      .slice(0, Number(secondWordIndex) + 1)
+      .join(" ").length;
+
     setAnchorEl(event.currentTarget);
 
     const existingSelection = phrase.entityLables.find((entityLabel) => {
       return (
-        entityLabel.startPos === selection.anchorOffset &&
-        entityLabel.endPos === selection.focusOffset
+        entityLabel.startPos === selectedStartPos &&
+        entityLabel.endPos === selectedEndPos
       );
     });
     if (existingSelection) {
@@ -71,15 +85,10 @@ export const TrainingPhraseComponent = (
     } else {
       setCurrentSelection({
         entity: "",
-        startPos: selection.anchorOffset,
-        endPos: selection.focusOffset,
+        startPos: selectedStartPos,
+        endPos: selectedEndPos,
       });
     }
-    console.log({
-      text,
-      startPos: selection.anchorOffset,
-      endPos: selection.focusOffset,
-    });
   };
   const closePopover = () => {
     setAnchorEl(null);
@@ -98,7 +107,6 @@ export const TrainingPhraseComponent = (
       });
       return;
     }
-    // if there is an existing label
     const existingSelectionIndex = phrase.entityLables.findIndex(
       (entityLabel) => {
         return (
@@ -110,7 +118,6 @@ export const TrainingPhraseComponent = (
     if (existingSelectionIndex !== -1) {
       phrase.entityLables[existingSelectionIndex] = selection;
     } else {
-      //check for overlap
       const overlappingSelection = phrase.entityLables.findIndex(
         (entityLabel) => {
           return (
@@ -128,15 +135,14 @@ export const TrainingPhraseComponent = (
         }
       );
       if (overlappingSelection !== -1) {
-        //delete overlap
         phrase.entityLables = phrase.entityLables.filter((label, index) => {
           return index !== overlappingSelection;
         });
       }
-      //add new label
       phrase.entityLables = [...phrase.entityLables, selection];
     }
   };
+  const words = buildWordsArray(phrase);
   return (
     <>
       <TableCell>
@@ -145,7 +151,9 @@ export const TrainingPhraseComponent = (
         ) : (
           <>
             <div onMouseUp={captureSelection}>
-              <Typography>{phrase.text} </Typography>
+              <Typography>
+                <WordsComponent phrase={phrase} words={words} />
+              </Typography>
             </div>
             <Popover
               open={anchorEl !== null}
