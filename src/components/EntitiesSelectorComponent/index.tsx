@@ -2,8 +2,8 @@ import FormControl from "@mui/material/FormControl";
 import React, { useEffect } from "react";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import { EntityLabel } from "./types";
-import { getEntitiesList } from "./api";
+import { EntityLabel } from "../types";
+import { getEntitiesList } from "../api";
 import { TextField } from "@mui/material";
 
 interface EntitiesSelectorProps {
@@ -11,7 +11,7 @@ interface EntitiesSelectorProps {
   onEntityNameChange: (selection: EntityLabel) => void;
 }
 
-const EntitiesSelector = (props: EntitiesSelectorProps) => {
+const EntitiesSelectorComponent = (props: EntitiesSelectorProps) => {
   const { onEntityNameChange, entityLabel } = props;
   const [selectedEntity, selectEntity] = React.useState<string>(
     entityLabel?.entity
@@ -76,4 +76,4 @@ const EntitiesSelector = (props: EntitiesSelectorProps) => {
   );
 };
 
-export default EntitiesSelector;
+export default EntitiesSelectorComponent;

@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Popover, TableCell, TextField, Typography } from "@mui/material";
-import { TrainingPhraseItem, EntityLabel } from "./types";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import EditIcon from "@mui/icons-material/Edit";
-import EntitiesSelector from "./EntitiesSelector";
-import { buildWordsArray, getWordPositions, isNumberInRange } from "./utils";
-import { WordsComponent } from "./WordsComponent";
+import EntitiesSelector from "../EntitiesSelectorComponent";
+import { TrainingPhraseItem, EntityLabel } from "../types";
+import { buildWordsArray, getWordPositions, isNumberInRange } from "../utils";
+import { WordsComponent } from "../WordsComponent";
 
 interface TrainingPhraseComponentProps {
   phrase: TrainingPhraseItem;

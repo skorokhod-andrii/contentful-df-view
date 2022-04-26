@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { FieldProps, TrainingPhraseItem } from "./types";
 import { Table, TableBody, TableRow, TextField } from "@mui/material";
-import { TrainingPhraseComponent } from "./TrainingPhraseComponent";
-import { createTrainingPhrase } from "./utils";
+import { FieldProps, TrainingPhraseItem } from "../types";
+import { TrainingPhraseComponent } from "../TrainingPhraseComponent";
+import { createTrainingPhrase } from "../utils";
 
-const Field = (props: FieldProps) => {
+const FieldComponent = (props: FieldProps) => {
   const [trainingPhrases, setTrainingPhrases] = useState<TrainingPhraseItem[]>(
     []
   );
@@ -85,4 +85,4 @@ const Field = (props: FieldProps) => {
   );
 };
 
-export default Field;
+export default FieldComponent;

@@ -1,5 +1,5 @@
 import React from "react";
-import { TrainingPhraseItem, Word } from "./types";
+import { TrainingPhraseItem, Word } from "../types";
 
 interface WordsComponentProps {
   phrase: TrainingPhraseItem;

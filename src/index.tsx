@@ -5,7 +5,7 @@ import "@contentful/forma-36-react-components/dist/styles.css";
 import { FieldExtensionSDK, init, locations } from "@contentful/app-sdk";
 import type { KnownSDK } from "@contentful/app-sdk";
 import { GlobalStyles } from "@contentful/f36-components";
-import Field from "./components/Field";
+import Field from "./components/FieldComponent";
 import LocalhostWarning from "./components/LocalhostWarning";
 
 if (process.env.NODE_ENV === "development" && window.self === window.top) {
