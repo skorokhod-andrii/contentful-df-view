@@ -5,7 +5,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
 import EditIcon from "@mui/icons-material/Edit";
 import EntitiesSelector from "./EntitiesSelector";
-import { buildWordsArray, isNumberInRange } from "./utils";
+import { buildWordsArray, getWordPositions, isNumberInRange } from "./utils";
 import { WordsComponent } from "./WordsComponent";
 
 interface TrainingPhraseComponentProps {
@@ -28,7 +28,6 @@ export const TrainingPhraseComponent = (
   const [currentSelection, setCurrentSelection] = useState<EntityLabel | null>(
     null
   );
-
   const redactPhrase = () => {
     setIsRedacted(true);
   };
@@ -48,31 +47,11 @@ export const TrainingPhraseComponent = (
   };
 
   const captureSelection = (event: any) => {
-    const selection = window.getSelection();
-    if (!selection) {
+    const { selectedStartPos, selectedEndPos } = getWordPositions(phrase);
+    if (selectedStartPos === undefined || selectedEndPos === undefined) {
       return;
     }
-    const text = selection.toString();
-    if (!text) {
-      return;
-    }
-    const anchorNum = selection.anchorNode?.parentElement?.dataset.count;
-    const focusNum = selection.focusNode?.parentElement?.dataset.count;
-    if (anchorNum === undefined || focusNum === undefined) {
-      console.log("no word index");
-      return;
-    }
-    const firstWordIndex = anchorNum < focusNum ? anchorNum : focusNum;
-    const secondWordIndex = anchorNum < focusNum ? focusNum : anchorNum;
-    const splittedWords = phrase.text.split(" ");
-    const selectedStartPos = splittedWords
-      .slice(0, Number(firstWordIndex))
-      .join(" ").length;
-    const selectedEndPos = splittedWords
-      .slice(0, Number(secondWordIndex) + 1)
-      .join(" ").length;
-
-    setAnchorEl(event.currentTarget);
+    setAnchorEl(event.currentTarget.parentElement);
 
     const existingSelection = phrase.entityLables.find((entityLabel) => {
       return (
@@ -96,6 +75,7 @@ export const TrainingPhraseComponent = (
   };
 
   const onEntityNameChange = (selection: EntityLabel) => {
+    console.log("onEntityNameChange", selection);
     // find is there an existing label in the phrase with those startPos or end pos. Or is there an overlapping in that range
     //if there is an existing label, and user clears it, we remove it
     if (!selection.entity) {
@@ -124,12 +104,12 @@ export const TrainingPhraseComponent = (
             isNumberInRange(
               selection.startPos,
               entityLabel.startPos,
-              entityLabel.endPos
+              entityLabel.endPos - 1
             ) ||
             isNumberInRange(
-              selection.endPos,
+              selection.endPos - 1,
               entityLabel.startPos,
-              entityLabel.endPos
+              entityLabel.endPos - 1
             )
           );
         }

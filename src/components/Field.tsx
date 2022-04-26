@@ -58,7 +58,7 @@ const Field = (props: FieldProps) => {
   };
 
   return (
-    <div>
+    <div id={"contentful-df-view"}>
       <div style={{ marginBottom: "10px" }}>
         <TextField
           fullWidth

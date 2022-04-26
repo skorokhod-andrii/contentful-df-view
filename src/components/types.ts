@@ -16,6 +16,8 @@ export interface EntityLabel {
   entity: string;
   startPos: number;
   endPos: number;
+  role?: string;
+  group?: string;
 }
 
 export interface Word {

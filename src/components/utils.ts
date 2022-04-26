@@ -67,3 +67,35 @@ export const createTrainingPhrase = (text: string): TrainingPhraseItem => {
     entityLables: [],
   };
 };
+
+export const getWordPositions = (phrase: TrainingPhraseItem) => {
+  const selection = window.getSelection();
+  if (!selection) {
+    console.log("No selection");
+    return {};
+  }
+  const text = selection.toString();
+  if (!text) {
+    console.log("No text");
+    return {};
+  }
+  const anchorNum = selection.anchorNode?.parentElement?.dataset.count;
+  const focusNum = selection.focusNode?.parentElement?.dataset.count;
+  if (anchorNum === undefined || focusNum === undefined) {
+    console.log("no word index");
+    return {};
+  }
+  const firstWordIndex = anchorNum < focusNum ? anchorNum : focusNum;
+  const secondWordIndex = anchorNum < focusNum ? focusNum : anchorNum;
+  const splittedWords = phrase.text.split(" ");
+  const selectedStartPos = splittedWords
+    .slice(0, Number(firstWordIndex))
+    .join(" ").length;
+  const selectedEndPos = splittedWords
+    .slice(0, Number(secondWordIndex) + 1)
+    .join(" ").length;
+  return {
+    selectedStartPos,
+    selectedEndPos,
+  };
+};
