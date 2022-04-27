@@ -68,8 +68,10 @@ export const createTrainingPhrase = (text: string): TrainingPhraseItem => {
   };
 };
 
-export const getWordPositions = (phrase: TrainingPhraseItem) => {
-  const selection = window.getSelection();
+export const getWordPositions = (
+  phrase: TrainingPhraseItem,
+  selection: Selection | null
+) => {
   if (!selection) {
     console.log("No selection");
     return {};

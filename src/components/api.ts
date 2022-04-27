@@ -22,6 +22,5 @@ export const getEntitiesList = async (): Promise<string[]> => {
     }
     return [...acc, name];
   }, [] as string[]);
-  console.log(entities);
   return list;
 };

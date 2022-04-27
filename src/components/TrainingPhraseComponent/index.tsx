@@ -47,7 +47,11 @@ export const TrainingPhraseComponent = (
   };
 
   const captureSelection = (event: any) => {
-    const { selectedStartPos, selectedEndPos } = getWordPositions(phrase);
+    const selection = window.getSelection();
+    const { selectedStartPos, selectedEndPos } = getWordPositions(
+      phrase,
+      selection
+    );
     if (selectedStartPos === undefined || selectedEndPos === undefined) {
       return;
     }
